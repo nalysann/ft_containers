@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# macOS
+.DS_Store
+
+# ft_containers
+test
+
+# CLion
+.idea/
+
+# cmake
+cmake-build-debug/
+cmake-build-release/
+cmake-build-asan/
