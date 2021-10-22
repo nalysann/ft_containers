@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "algorithm.hpp"
 #include "iterator.hpp"
 #include "nullptr.hpp"
 
@@ -9,22 +10,19 @@ namespace ft {
 
     template <class T, class Allocator = std::allocator<T> >
     class vector {
-    private:
-        typedef std::allocator_traits<Allocator> alloc_traits;
-
     public:
         typedef T value_type;
         typedef Allocator allocator_type;
-        typedef typename alloc_traits::size_type size_type;
-        typedef typename alloc_traits::difference_type difference_type;
-        typedef typename alloc_traits::reference reference;
-        typedef typename alloc_traits::const_reference const_reference;
-        typedef typename alloc_traits::pointer pointer;
-        typedef typename alloc_traits::const_pointer const_pointer;
+        typedef typename allocator_type::size_type size_type;
+        typedef typename allocator_type::difference_type difference_type;
+        typedef typename allocator_type::reference reference;
+        typedef typename allocator_type::const_reference const_reference;
+        typedef typename allocator_type::pointer pointer;
+        typedef typename allocator_type::const_pointer const_pointer;
         typedef impl::wrap_iter<pointer> iterator;
         typedef impl::wrap_iter<const_pointer> const_iterator;
-        typedef reverse_iterator<iterator> reverse_iterator;
-        typedef reverse_iterator<const_iterator> const_reverse_iterator;
+        typedef ft::reverse_iterator<iterator> reverse_iterator;
+        typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
     private:
         pointer begin_;
@@ -33,6 +31,7 @@ namespace ft {
         allocator_type alloc_;
 
     public:
+        // TODO
         explicit vector(const allocator_type& alloc = allocator_type())
             : begin_(nullptr_v)
             , end_(nullptr_v)
@@ -40,22 +39,20 @@ namespace ft {
             , alloc_(alloc)
         {}
 
+        // TODO
         explicit vector(size_type n, const value_type& val = value_type(),
                         const allocator_type& alloc = allocator_type())
-            : begin_(nullptr_v)
-            , end_(nullptr_v)
-            , end_cap_(nullptr_v)
+            : begin_(alloc_.allocate(n))
+            , end_(begin_)
+            , end_cap_(begin_ + n)
             , alloc_(alloc)
         {
-            begin_ = alloc_.allocate(n);
-            end_ = begin_;
-            end_cap_ = begin_ + n;
-
             for (; n--; ) {
                 alloc_.construct(end_++, val);
             }
         }
 
+        // very TODO
         template <class InputIterator>
         vector(InputIterator first, InputIterator last,
                const allocator_type& alloc = allocator_type(),
@@ -66,54 +63,33 @@ namespace ft {
             if (!(is_valid = ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::value))
                 throw (ft::InvalidIteratorException<typename ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::type>());
 
-            difference_type n = ft::distance(first, last);
+            difference_type n = distance(first, last);
             _start = _alloc.allocate( n );
             _end_capacity = _start + n;
             _end = _start;
-            while (n--)
-            {
+            for (; n--; ) {
                 _alloc.construct(_end, *first++);
                 _end++;
             }
         }
 
-        /*
-        ** @brief Copy.
-        ** Construct a vector, initializing its contents
-        ** with a copy of each element of "x" elements in
-        ** the same order. Use a copy of "x" allocator.
-        **
-        ** @param "x" the vector container to copy.
-        */
-        vector (const vector& x)
-                :
-                _alloc(x._alloc),
-                _start(u_nullptr),
-                _end(u_nullptr),
-                _end_capacity(u_nullptr)
+        // TODO
+        vector (const vector& v)
+            : begin_(nullptr_v)
+            , end_(nullptr_v)
+            , end_cap_(nullptr_v)
+            , alloc_(v.alloc_)
         {
-            this->insert(this->begin(), x.begin(), x.end());
+            insert(begin(), v.begin(), v.end());
         }
 
-        /*
-        ** @brief Destroy the container object.
-        ** Destroy all elements in the container and deallocate
-        ** the container capacity.
-        */
-        ~vector()
-        {
-            this->clear();
-            _alloc.deallocate(_start, this->capacity());
+        // TODO
+        ~vector() {
+            clear();
+            alloc_.deallocate(begin_, capacity());
         }
 
-        /*
-        ** @brief Assigns contents from "x" to the container.
-        ** Replace content of this and according size.
-        ** All elements before the call are destroyed.
-        **
-        ** @param x the container which we inspire.
-        ** @return *this.
-        */
+        // TODO
         vector &operator=(const vector& x)
         {
             if (x == *this)
@@ -123,128 +99,40 @@ namespace ft {
             return (*this);
         }
 
-        // Iterators:
+        iterator begin() { return begin_; }
+        const_iterator begin() const { return begin_; }
+        iterator end() { return end_; }
+        const_iterator end() const { return end_; }
 
-        /*
-        ** @brief Return an iterator pointing on the first element
-        ** in the container. If the container is empty, the
-        ** returned iterator value shall no be dereferenced.
-        ** The iterator is of type iterator (random access iterator
-        ** on value_type reference).
-        **
-        ** @return The iterator to the first element.
-        */
-        iterator begin() { return (_start); };
+        reverse_iterator rbegin() { return reverse_iterator(end()); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+        reverse_iterator rend() { return reverse_iterator(begin()); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-        /*
-        ** @brief Return an iterator pointing on the first element
-        ** in the container. If the container is empty, the
-        ** returned iterator value shall no be dereferenced.
-        ** The iterator is of type const_iterator (random access
-        ** iterator on const value_type reference).
-        **
-        ** @return The iterator to the first element.
-        */
-        const_iterator begin() const { return (_start); }
-
-        /*
-        ** @brief Return an iterator pointing on the past-the-end element
-        ** in the vector container. Past-the-end is the theorical element
-        ** following the last element in the container. If the container is
-        ** empty, return the same than begin.
-        ** The iterator is of type iterator (random access iterator
-        ** on value_type reference).
-        **
-        ** @return The iterator to the past-the-end element or begin if
-        ** the container is empty.
-        */
-        iterator end()
-        {
-            if (this->empty())
-                return (this->begin());
-            return (_end);
+        size_type size() const {
+            return static_cast<size_type>(end_ - begin_);
         }
 
-        /*
-        ** @brief Return an iterator pointing on the past-the-end element
-        ** in the vector container. Past-the-end is the theorical element
-        ** following the last element in the container. If the container is
-        ** empty, return the same than begin.
-        ** The iterator is of type const_iterator (random access
-        ** iterator on const value_type reference).
-        **
-        ** @return The iterator to the past-the-end element or begin if
-        ** the container is empty.
-        */
-        const_iterator end() const
-        {
-            if (this->empty())
-                return (this->begin());
-            return (_end);
+        size_type capacity() const {
+            return static_cast<size_type>(end_cap_ - begin_);
         }
 
-        /*
-        ** @brief Give a reverse iterator pointing to the last element
-        ** in the container (this->end() - 1).
-        ** This is a reversed random access iterator.
-        **
-        ** @return A reverse Iterator to the reverse beginning of the.
-        */
-        reverse_iterator rbegin() { return (reverse_iterator(this->end())); }
+        bool empty() const {
+            return begin_ == end_;
+        }
 
-        /*
-        ** @brief Give a const reverse iterator pointing to the last
-        ** element in the container (this->end() - 1).
-        ** This is a constant reversed random access iterator.
-        **
-        ** @return A const reverse Iterator to the reverse beginning of the.
-        */
-        const_reverse_iterator rbegin() const { return (reverse_iterator(this->end())); }
+        // TODO
+        size_type max_size() const {
+            return allocator_type().max_size();
+        }
 
-        /*
-        ** @brief Give a reverse iterator point to the
-        ** theorical element preceding the first element
-        ** in the container.
-        **
-        ** @return the reverse iterator.
-        */
-        reverse_iterator rend() { return (reverse_iterator(this->begin())); }
+        reference front() { return *begin_; }
+        const_reference front() const { return *begin_; }
+        reference back() { return *(end_ - 1); }
+        const_reference back() const { return *(end_ - 1); }
 
-        /*
-        ** @brief Give a const reverse iterator point to the
-        ** theorical element preceding the first element
-        ** in the container.
-        **
-        ** @return the const reverse iterator.
-        */
-        const_reverse_iterator rend() const { return (reverse_iterator(this->begin())); }
-
-        // Capacity:
-
-        /*
-        ** @brief Returns the number of elements stored.
-        ** It's not necessarily equal to the storage capacity
-        **
-        ** @return The number of elements in the container.
-        ** (An unsigned integral type)
-        */
-        size_type   size(void) const { return (this->_end - this->_start); }
-
-        /*
-        ** @brief Returns the maximum potential number of elements the the
-        ** vector can hold.
-        ** This size is due to known system or library limitations.
-        ** The vector is not garanteed to have this size, it can
-        ** fail a allocation for exemple.
-        **
-        ** Documentation :
-        ** https://www.viva64.com/en/a/0050/
-        **
-        ** @return The maximum potential number of elements the
-        ** container can hold.
-        ** (An unsigned integral type)
-        */
-        size_type   max_size(void) const { return allocator_type().max_size(); }
+        value_type* data() { return begin_; }
+        const value_type* data() const { return begin_; }
 
         /*
         ** @brief Resizes the container so that it contain "n"
@@ -271,26 +159,6 @@ namespace ft {
             else
                 this->insert(this->end(), n - this->size(), val);
         }
-
-        /*
-        ** @brief Return size of allocated storage capacity.
-        ** Not necessarily equal to vector size. Can be equal
-        ** or greater, because extra space allocated by the container
-        ** forecast allocation system.
-        **
-        ** @return The size of currntly allocated storage capacity.
-        ** The number elements it can hold.
-        ** (An unsigned integral type)
-        */
-        size_type   capacity (void) const { return (this->_end_capacity - this->_start); }
-
-        /*
-        ** @brief Returns whether the container is empty.
-        ** Does not modify container in any way.
-        **
-        ** @return true if the container size is 0, false otherwise.
-        */
-        bool        empty (void) const { return (size() == 0 ? true : false); }
 
         /*
         ** @brief Request that the vector capacity be at least
@@ -379,40 +247,6 @@ namespace ft {
             checkRange(n);
             return ((*this)[n]);
         }
-
-        /*
-        ** @brief Return a reference to the first element
-        ** of the container. Call this on an empty container
-        ** cause undefined behavior.
-        **
-        ** @return The reference.
-        */
-        reference front () { return (*_start); }
-
-        /*
-        ** @brief Return a const reference to the first element
-        ** of the container. Call this on an empty container
-        ** cause undefined behavior.
-        **
-        ** @return The const reference.
-        */
-        const_reference front () const { return (*_start); }
-
-        /*
-        ** @brief Return a reference to the last element in the container.
-        ** If the container is empty, occur undefined behavior.
-        **
-        ** @return The reference to the last element.
-        */
-        reference back () { return (*(_end - 1)); }
-
-        /*
-        ** @brief Return a const reference to the last element in the container.
-        ** If the container is empty, occur undefined behavior.
-        **
-        ** @return The const reference to the last element.
-        */
-        const_reference back () const { return (*(_end - 1)); }
 
         // Modifiers:
 
@@ -819,113 +653,39 @@ namespace ft {
         }
     };
 
-    // Non-member function overloads
-
-    /*
-    ** @brief Compare vector container to know
-    ** if they are equal. Start to check if the size
-    ** is different.
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if they are equal, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator== (const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
-    {
-        if (lhs.size() != rhs.size())
-            return (false);
-        typename ft::vector<T>::const_iterator first1 = lhs.begin();
-        typename ft::vector<T>::const_iterator first2 = rhs.begin();
-        while (first1 != lhs.end())
-        {
-            if (first2 == rhs.end() || *first1 != *first2)
-                return (false);
-            ++first1;
-            ++first2;
-        }
-        return (true);
+    template <class T, class Allocator>
+    inline bool operator==(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return lhs.size() == rhs.size() && equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    /*
-    ** @brief Compare vector container to know
-    ** if they are different. Equivalent to !(lsh == rhs).
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if they are different, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator!= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
-    {
-        return (!(lhs == rhs));
+    template <class T, class Allocator>
+    inline bool operator!=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return !(lhs == rhs);
     }
 
-    /*
-    ** @brief Compare vector container to know
-    ** if "lhs" elements are lexicographicalement less than "rhs".
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if "lhs" is lexicographicalement less, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator<  (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
-    {
-        return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+    template <class T, class Allocator>
+    inline bool operator<(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     }
 
-    /*
-    ** @brief Compare vector container to know
-    ** if "lhs" elements are lexicographicalement less or equal than "rhs".
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if "lhs" is lexicographicalement less or equal, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator<= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
-    {
-        return (!(rhs < lhs));
+    template <class T, class Allocator>
+    inline bool operator>(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return rhs < lhs;
     }
 
-    /*
-    ** @brief Compare vector container to know
-    ** if "lhs" elements are lexicographicalement superior than "rhs".
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if "lhs" is lexicographicalement superior, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator>  (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
-    {
-        return (rhs < lhs);
+    template <class T, class Allocator>
+    inline bool operator<=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return !(rhs < lhs);
     }
 
-    /*
-    ** @brief Compare vector container to know
-    ** if "lhs" elements are lexicographicalement superior or equal than "rhs".
-    **
-    ** @param lhs vector to compare with "rhs".
-    ** @param rhs vector for comparison of "lhs".
-    ** @return true if "lhs" is lexicographicalement superior or equal, false otherwise.
-    */
-    template <class T, class Alloc>
-    bool operator>= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
-    {
-        return (!(lhs < rhs));
+    template <class T, class Allocator>
+    inline bool operator>=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+        return !(lhs < rhs);
     }
 
-    /*
-    ** @brief Overload of swap (vector).
-    ** The contents of container are swaped.
-    **
-    ** @param x, y the containers to swap.
-    */
-    template <class T, class Alloc>
-    void swap (vector<T,Alloc>& x, vector<T,Alloc>&y)
-    {
-        x.swap(y);
+    template <class T, class Allocator>
+    inline void swap(vector<T, Allocator>& lhs, vector<T, Allocator>& rhs) {
+        lhs.swap(rhs);
     }
+
 }
