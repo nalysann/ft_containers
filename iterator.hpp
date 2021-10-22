@@ -235,7 +235,7 @@ namespace ft {
         private:
             wrap_iter(iterator_type x) : i(x) {}
 
-            template <class Up>
+            template <class U>
             friend class wrap_iter;
 
             template <class T, class Allocator>
@@ -243,69 +243,69 @@ namespace ft {
         };
 
         template <class Iter>
-        bool operator==(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return lhs.base() == rhs.base();
+        bool operator==(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return x.base() == y.base();
         }
 
         template <class Iter1, class Iter2>
-        bool operator==(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return lhs.base() == rhs.base();
+        bool operator==(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return x.base() == y.base();
         }
 
         template <class Iter>
-        bool operator<(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return lhs.base() < rhs.base();
+        bool operator<(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return x.base() < y.base();
         }
 
         template <class Iter1, class Iter2>
-        bool operator<(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return lhs.base() < rhs.base();
+        bool operator<(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return x.base() < y.base();
         }
 
         template <class Iter>
-        bool operator!=(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return !(lhs == rhs);
+        bool operator!=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return !(x == y);
         }
 
         template <class Iter1, class Iter2>
-        bool operator!=(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return !(lhs == rhs);
+        bool operator!=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return !(x == y);
         }
 
         template <class Iter>
-        bool operator>(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return rhs < lhs;
+        bool operator>(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return y < x;
         }
 
         template <class Iter1, class Iter2>
-        bool operator>(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return rhs < lhs;
+        bool operator>(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return y < x;
         }
 
         template <class Iter>
-        bool operator>=(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return !(lhs < rhs);
+        bool operator>=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return !(x < y);
         }
 
         template <class Iter1, class Iter2>
-        bool operator>=(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return !(lhs < rhs);
+        bool operator>=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return !(x < y);
         }
 
         template <class Iter>
-        bool operator<=(const wrap_iter<Iter>& lhs, const wrap_iter<Iter>& rhs) {
-            return !(rhs < lhs);
+        bool operator<=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+            return !(y < x);
         }
 
         template <class Iter1, class Iter2>
-        bool operator<=(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return !(rhs < lhs);
+        bool operator<=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return !(y < x);
         }
 
         template <class Iter1, class Iter2>
         typename wrap_iter<Iter1>::difference_type
-        operator-(const wrap_iter<Iter1>& lhs, const wrap_iter<Iter2>& rhs) {
-            return lhs.base() - rhs.base();
+        operator-(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+            return x.base() - y.base();
         }
 
         template <class Iter>
