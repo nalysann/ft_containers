@@ -3,7 +3,6 @@
 namespace ft {
 
     static struct nullptr_t {
-    public:
         template<class T>
         operator T*() const { return 0; }
 
