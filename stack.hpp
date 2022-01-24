@@ -4,7 +4,7 @@
 
 namespace ft {
 
-    template <class T, class Container = vector<T> >
+    template <class T, class Container = ft::vector<T> >
     class stack {
     public:
         typedef Container container_type;
@@ -14,28 +14,26 @@ namespace ft {
         typedef typename container_type::size_type size_type;
 
     protected:
-        container_type c;
+        container_type c_;
 
     public:
-        stack() : c() {}
+        explicit stack(const container_type& c = container_type()) : c_(c) {}
 
-        stack(const stack& s) : c(s.c) {}
+        stack(const stack& s) : c_(s.c) {}
 
-        stack& operator=(const stack& s) { c = s.c; return *this; }
+        stack& operator=(const stack& s) { c_ = s.c; return *this; }
 
-        explicit stack(const container_type& c) : c(c) {}
+        bool empty() const { return c_.empty(); }
 
-        bool empty() const { return c.empty(); }
+        size_type size() const { return c_.size(); }
 
-        size_type size() const { return c.size(); }
+        reference top() { return c_.back(); }
 
-        reference top() { return c.back(); }
+        const_reference top() const { return c_.back(); }
 
-        const_reference top() const { return c.back(); }
+        void push(const value_type& v) { c_.push_back(v); }
 
-        void push(const value_type& v) { c.push_back(v); }
-
-        void pop() { c.pop_back(); }
+        void pop() { c_.pop_back(); }
 
         template <class T1, class C1>
         friend bool operator==(const stack<T1, C1>& lhs, const stack<T1, C1>& rhs);
