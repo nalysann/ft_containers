@@ -1,10 +1,11 @@
 #pragma once
 
+#include <cstddef>
+#include <iterator>
 #include <memory>
 
 #include "algorithm.hpp"
 #include "iterator.hpp"
-#include "nullptr.hpp"
 
 namespace ft {
 
@@ -25,78 +26,89 @@ namespace ft {
         typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
     private:
+        allocator_type alloc_;
         pointer begin_;
         pointer end_;
         pointer end_cap_;
-        allocator_type alloc_;
 
     public:
-        // TODO
         explicit vector(const allocator_type& alloc = allocator_type())
-            : begin_(nullptr_v)
-            , end_(nullptr_v)
-            , end_cap_(nullptr_v)
-            , alloc_(alloc)
+            : alloc_(alloc)
+            , begin_(NULL)
+            , end_(NULL)
+            , end_cap_(NULL)
         {}
 
-        // TODO
         explicit vector(size_type n, const value_type& val = value_type(),
                         const allocator_type& alloc = allocator_type())
-            : begin_(alloc_.allocate(n))
-            , end_(begin_)
-            , end_cap_(begin_ + n)
-            , alloc_(alloc)
+            : alloc_(alloc)
+            , begin_(NULL)
+            , end_(NULL)
+            , end_cap_(NULL)
         {
-            for (; n--; ) {
-                alloc_.construct(end_++, val);
+            if (n > 0) {
+                begin_ = alloc_.allocate(n);
+                end_ = begin_;
+                end_cap_ = begin_ + n;
+                while (n--) {
+                    alloc_.construct(end_++, val);
+                }
             }
         }
 
-        // very TODO
         template <class InputIterator>
         vector(InputIterator first, InputIterator last,
                const allocator_type& alloc = allocator_type(),
-               typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* = nullptr_v)
+               typename enable_if<!is_integral<InputIterator>::value>::type* = NULL)
             : alloc_(alloc)
+            , begin_(NULL)
+            , end_(NULL)
+            , end_cap_(NULL)
         {
-            bool is_valid;
-            if (!(is_valid = ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::value))
-                throw (ft::InvalidIteratorException<typename ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::type>());
-
-            difference_type n = distance(first, last);
-            _start = _alloc.allocate( n );
-            _end_capacity = _start + n;
-            _end = _start;
-            for (; n--; ) {
-                _alloc.construct(_end, *first++);
-                _end++;
+            difference_type n = std::distance(first, last);
+            if (n > 0) {
+                begin_ = alloc_.allocate(n);
+                end_ = begin_;
+                end_cap_ = begin_ + n;
+                while (n--) {
+                    alloc_.construct(end_++, *first++);
+                }
             }
         }
 
-        // TODO
-        vector (const vector& v)
-            : begin_(nullptr_v)
-            , end_(nullptr_v)
-            , end_cap_(nullptr_v)
-            , alloc_(v.alloc_)
+        vector(const vector& v)
+            : alloc_(v.alloc_)
+            , begin_(NULL)
+            , end_(NULL)
+            , end_cap_(NULL)
         {
-            insert(begin(), v.begin(), v.end());
+            size_type n = v.size();
+            if (n > 0) {
+                pointer first = v.begin_;
+                begin_ = alloc_.allocate(n);
+                end_ = begin_;
+                end_cap_ = begin_ + n;
+                while (n--) {
+                    alloc_.construct(end_++, *first++);
+                }
+            }
         }
 
-        // TODO
+        vector& operator=(const vector& v) {
+            if (this != &v) {
+                clear();
+                alloc_.deallocate(begin_, capacity());
+                begin_ = end_ = end_cap_ = NULL;
+                assign(v.begin_, v.end_);
+            }
+            return *this;
+        }
+
         ~vector() {
-            clear();
-            alloc_.deallocate(begin_, capacity());
-        }
-
-        // TODO
-        vector &operator=(const vector& x)
-        {
-            if (x == *this)
-                return (*this);
-            this->clear();
-            this->insert(this->end(), x.begin(), x.end());
-            return (*this);
+            if (begin_ != NULL) {
+                clear();
+                alloc_.deallocate(begin_, capacity());
+            }
         }
 
         iterator begin() { return begin_; }
