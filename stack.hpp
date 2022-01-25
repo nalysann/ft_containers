@@ -19,9 +19,9 @@ namespace ft {
     public:
         explicit stack(const container_type& c = container_type()) : c_(c) {}
 
-        stack(const stack& s) : c_(s.c) {}
+        stack(const stack& x) : c_(x.c_) {}
 
-        stack& operator=(const stack& s) { c_ = s.c; return *this; }
+        stack& operator=(const stack& x) { c_ = x.c_; return *this; }
 
         bool empty() const { return c_.empty(); }
 
@@ -36,40 +36,40 @@ namespace ft {
         void pop() { c_.pop_back(); }
 
         template <class T1, class C1>
-        friend bool operator==(const stack<T1, C1>& lhs, const stack<T1, C1>& rhs);
+        friend bool operator==(const stack<T1, C1>& x, const stack<T1, C1>& y);
 
         template <class T1, class C1>
-        friend bool operator<(const stack<T1, C1>& lhs, const stack<T1, C1>& rhs);
+        friend bool operator<(const stack<T1, C1>& x, const stack<T1, C1>& y);
     };
 
     template <class T, class Container>
-    inline bool operator==(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return lhs.c == rhs.c;
+    inline bool operator==(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return x.c == y.c;
     }
 
     template <class T, class Container>
-    inline bool operator!=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return !(lhs == rhs);
+    inline bool operator!=(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return !(x == y);
     }
 
     template <class T, class Container>
-    inline bool operator<(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return lhs.c < rhs.c;
+    inline bool operator<(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return x.c < y.c;
     }
 
     template <class T, class Container>
-    inline bool operator>(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return rhs < lhs;
+    inline bool operator>(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return y < x;
     }
 
     template <class T, class Container>
-    inline bool operator<=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return !(rhs < lhs);
+    inline bool operator<=(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return !(y < x);
     }
 
     template <class T, class Container>
-    inline bool operator>=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
-        return !(lhs < rhs);
+    inline bool operator>=(const stack<T, Container>& x, const stack<T, Container>& y) {
+        return !(x < y);
     }
 
 }

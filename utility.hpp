@@ -15,9 +15,9 @@ namespace ft {
         pair(const T1& a, const T2& b) : first(a), second(b) {}
 
         template<class U1, class U2>
-        pair(const pair<U1, U2>& p) : first(p.first), second(p.second) {}
+        pair(const pair<U1, U2>& x) : first(x.first), second(x.second) {}
 
-        pair& operator=(const pair& p) { first = p.first; second = p.second; return *this; }
+        pair& operator=(const pair& x) { first = x.first; second = x.second; return *this; }
     };
 
     template <class T1, class T2>
