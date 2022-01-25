@@ -51,11 +51,8 @@ namespace ft {
             , end_cap_(NULL)
         {
             if (n > 0) {
-                begin_ = end_ = alloc_.allocate(n);
-                end_cap_ = begin_ + n;
-                while (n--) {
-                    alloc_.construct(end_++, val);
-                }
+                vallocate(n);
+                construct_at_end(n, val);
             }
         }
 
@@ -68,13 +65,8 @@ namespace ft {
             , end_(NULL)
             , end_cap_(NULL)
         {
-            difference_type n = std::distance(first, last);
-            if (n > 0) {
-                begin_ = end_ = alloc_.allocate(n);
-                end_cap_ = begin_ + n;
-                while (n--) {
-                    alloc_.construct(end_++, *first++);
-                }
+            for (; first != last; ++first) {
+                push_back(*first);
             }
         }
 
@@ -86,19 +78,14 @@ namespace ft {
         {
             size_type n = x.size();
             if (n > 0) {
-                pointer first = x.begin_;
-                begin_ = end_ = alloc_.allocate(n);
-                end_cap_ = begin_ + n;
-                while (n--) {
-                    alloc_.construct(end_++, *first++);
-                }
+                vallocate(n);
+                construct_at_end(x.begin_, x.end_);
             }
         }
 
         vector& operator=(const vector& x) {
             if (this != &x) {
-                clear();
-                alloc_.deallocate(begin_, capacity());
+                vdeallocate();
                 begin_ = end_ = end_cap_ = NULL;
                 assign(x.begin_, x.end_);
             }
@@ -106,10 +93,7 @@ namespace ft {
         }
 
         ~vector() {
-            if (begin_ != NULL) {
-                clear();
-                alloc_.deallocate(begin_, capacity());
-            }
+            vdeallocate();
         }
 
         iterator begin() { return begin_; }
@@ -140,30 +124,21 @@ namespace ft {
                 alloc_.deallocate(new_begin, n);
                 throw;
             }
-            while (end_ != begin_) {
-                alloc_.destroy(--end_);
-            }
-            if (begin_ != NULL) {
-                alloc_.deallocate(begin_, capacity());
-            }
+            vdeallocate();
             begin_ = new_begin;
             end_ = new_end;
             end_cap_ = new_end_cap;
         }
 
         void resize(size_type n, value_type val = value_type()) {
-            if (n < size()) {
-                pointer new_end = begin_ + n;
-                while (end_ != new_end) {
-                    alloc_.destroy(--end_);
-                }
-            } else if (n > size()) {
+            size_type sz = size();
+            if (sz < n) {
                 if (n > capacity()) {
                     reserve(n);
                 }
-                while (end_ != end_cap_) {
-                    alloc_.construct(end_++, val);
-                }
+                construct_at_end(n - sz, val);
+            } else if (sz > n) {
+                destruct_at_end(begin_ + n);
             }
         }
 
@@ -189,79 +164,39 @@ namespace ft {
         reference back() { return *(end_ - 1); }
         const_reference back() const { return *(end_ - 1); }
 
-//        // todo
-//        template <class InputIterator>
-//        void assign (InputIterator first, InputIterator last,
-//                     typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* = u_nullptr)
-//        {
-//            bool is_valid;
-//            if (!(is_valid = ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category>::value))
-//                throw (ft::InvalidIteratorException<typename ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::type>());
-//            this->clear();
-//            size_type dist = ft::distance(first, last);
-//            if (size_type(_end_capacity - _start) >= dist)
-//            {
-//                for(; &(*first) != &(*last); first++, _end++)
-//                    _alloc.construct(_end, *first);
-//            }
-//            else
-//            {
-//                pointer new_start = pointer();
-//                pointer new_end = pointer();
-//                pointer new_end_capacity = pointer();
-//
-//                new_start = _alloc.allocate(dist);
-//                new_end = new_start;
-//                new_end_capacity = new_start + dist;
-//
-//                for(; &(*first) != &(*last); first++, new_end++)
-//                    _alloc.construct(new_end, *first);
-//
-//                _alloc.deallocate(_start, this->capacity());
-//
-//                _start = new_start;
-//                _end = new_end;
-//                _end_capacity = new_end_capacity;
-//            }
-//        }
-//
-//        // todo
-//        void assign (size_type n, const value_type& val)
-//        {
-//            this->clear();
-//            if (n == 0)
-//                return ;
-//            if (size_type(_end_capacity - _start) >= n)
-//            {
-//                while (n)
-//                {
-//                    _alloc.construct(_end++ , val);
-//                    n--;
-//                }
-//            }
-//            else
-//            {
-//                _alloc.deallocate(_start, this->capacity());
-//                _start = _alloc.allocate( n );
-//                _end = _start;
-//                _end_capacity = _start + n;
-//                while (n)
-//                {
-//                    _alloc.construct(_end++, val);
-//                    n--;
-//                }
-//            }
-//        }
+        template <class InputIterator>
+        typename enable_if<!is_integral<InputIterator>::value, void>::type
+        assign(InputIterator first, InputIterator last) {
+            clear();
+            for (; first != last; ++first)
+                push_back(*first);
+        }
+
+        void assign(size_type n, const value_type& val) {
+            if (n <= capacity()) {
+                size_type sz = size();
+                std::fill_n(begin_, std::min(n, sz), val);
+                if (n > sz) {
+                    construct_at_end(n - sz, val);
+                } else {
+                    destruct_at_end(begin_ + n);
+                }
+            } else {
+                vdeallocate();
+                vallocate(n);
+                construct_at_end(n, val);
+            }
+        }
 
         void push_back(const value_type& val) {
             if (end_ == end_cap_) {
                 reserve(capacity() ? capacity() * 2 : 1);
             }
-            alloc_.construct(end_++, val);
+            construct_at_end(1, val);
         }
 
         void pop_back() {
-            alloc_.destroy(--end_);
+            destruct_at_end(end_ - 1);
         }
 
 //        // todo
@@ -422,7 +357,7 @@ namespace ft {
                 alloc_.destroy(to);
                 alloc_.construct(to, *from);
             }
-            alloc_.destroy(--end_);
+            destruct_at_end(end_ - 1);
             return begin_ + d;
         }
 
@@ -434,9 +369,7 @@ namespace ft {
                     alloc_.destroy(to);
                     alloc_.construct(to, *from);
                 }
-                while (end_ != to) {
-                    alloc_.destroy(--end_);
-                }
+                destruct_at_end(to);
             }
             return begin_ + d;
         }
@@ -450,13 +383,43 @@ namespace ft {
         }
 
         void clear() {
-            while (end_ != begin_) {
-                alloc_.destroy(--end_);
-            }
+            destruct_at_end(begin_);
         }
 
         allocator_type get_allocator() const {
             return alloc_;
+        }
+
+    private:
+        void vallocate(size_type n) {
+            begin_ = end_ = alloc_.allocate(n);
+            end_cap_ = begin_ + n;
+        }
+
+        void vdeallocate() {
+            if (begin_ != NULL) {
+                clear();
+                alloc_.deallocate(begin_, capacity());
+            }
+        }
+
+        void construct_at_end(size_type n, const value_type& val) {
+            while (n--) {
+                alloc_.construct(end_++, val);
+            }
+        }
+
+        template <class InputIterator>
+        void construct_at_end(InputIterator first, InputIterator last) {
+            while (first != last) {
+                alloc_.construct(end_++, *first++);
+            }
+        }
+
+        void destruct_at_end(pointer new_end) {
+            while (end_ != new_end) {
+                alloc_.destroy(--end_);
+            }
         }
     };
 
