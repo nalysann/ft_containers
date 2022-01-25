@@ -1,8 +1,11 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <limits>
 #include <memory>
+#include <stdexcept>
 
 #include "algorithm.hpp"
 #include "iterator.hpp"
@@ -47,8 +50,7 @@ namespace ft {
             , end_cap_(NULL)
         {
             if (n > 0) {
-                begin_ = alloc_.allocate(n);
-                end_ = begin_;
+                begin_ = end_ = alloc_.allocate(n);
                 end_cap_ = begin_ + n;
                 while (n--) {
                     alloc_.construct(end_++, val);
@@ -67,8 +69,7 @@ namespace ft {
         {
             difference_type n = std::distance(first, last);
             if (n > 0) {
-                begin_ = alloc_.allocate(n);
-                end_ = begin_;
+                begin_ = end_ = alloc_.allocate(n);
                 end_cap_ = begin_ + n;
                 while (n--) {
                     alloc_.construct(end_++, *first++);
@@ -85,8 +86,7 @@ namespace ft {
             size_type n = v.size();
             if (n > 0) {
                 pointer first = v.begin_;
-                begin_ = alloc_.allocate(n);
-                end_ = begin_;
+                begin_ = end_ = alloc_.allocate(n);
                 end_cap_ = begin_ + n;
                 while (n--) {
                     alloc_.construct(end_++, *first++);
@@ -121,144 +121,72 @@ namespace ft {
         reverse_iterator rend() { return reverse_iterator(begin()); }
         const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-        size_type size() const {
-            return static_cast<size_type>(end_ - begin_);
+        size_type size() const { return static_cast<size_type>(end_ - begin_); }
+        size_type capacity() const { return static_cast<size_type>(end_cap_ - begin_); }
+        size_type max_size() const { return std::min<size_type>(alloc_.max_size(), std::numeric_limits<difference_type>::max()); }
+        bool empty() const { return begin_ == end_; }
+
+        void reserve(size_type n) {
+            if (n <= capacity()) {
+                return;
+            }
+            pointer new_begin = alloc_.allocate(n);
+            pointer new_end = new_begin + size();
+            pointer new_end_cap = new_begin + n;
+            try {
+                std::uninitialized_copy(begin_, end_, new_begin);
+            } catch (...) {
+                alloc_.deallocate(new_begin, n);
+                throw;
+            }
+            while (end_ != begin_) {
+                alloc_.destroy(--end_);
+            }
+            if (begin_ != NULL) {
+                alloc_.deallocate(begin_, capacity());
+            }
+            begin_ = new_begin;
+            end_ = new_end;
+            end_cap_ = new_end_cap;
         }
 
-        size_type capacity() const {
-            return static_cast<size_type>(end_cap_ - begin_);
+        void resize(size_type n, value_type val = value_type()) {
+            if (n < size()) {
+                pointer new_end = begin_ + n;
+                while (end_ != new_end) {
+                    alloc_.destroy(--end_);
+                }
+            } else if (n > size()) {
+                if (n > capacity()) {
+                    reserve(n);
+                }
+                while (end_ != end_cap_) {
+                    alloc_.construct(end_++, val);
+                }
+            }
         }
 
-        bool empty() const {
-            return begin_ == end_;
+        reference operator[](size_type n) { return begin_[n]; }
+        const_reference operator[](size_type n) const { return begin_[n]; }
+
+        reference at(size_type n) {
+            if (n >= size()) {
+                throw std::out_of_range("vector");
+            }
+            return begin_[n];
         }
 
-        // TODO
-        size_type max_size() const {
-            return allocator_type().max_size();
+        const_reference at(size_type n) const {
+            if (n >= size()) {
+                throw std::out_of_range("vector");
+            }
+            return begin_[n];
         }
 
         reference front() { return *begin_; }
         const_reference front() const { return *begin_; }
         reference back() { return *(end_ - 1); }
         const_reference back() const { return *(end_ - 1); }
-
-        value_type* data() { return begin_; }
-        const value_type* data() const { return begin_; }
-
-        /*
-        ** @brief Resizes the container so that it contain "n"
-        ** element. If "n" is smaller than the actual size
-        ** the container is reduced to "n". If it is greater,
-        ** val is inserting at the end and according capacity
-        ** to allocation calcul system.
-        **
-        ** @param n the new size of the container.
-        ** @param val the element to set.
-        */
-        void        resize (size_type n, value_type val = value_type())
-        {
-            if (n > this->max_size())
-                throw (std::length_error("vector::resize"));
-            else if (n < this->size())
-            {
-                while (this->size() > n)
-                {
-                    --_end;
-                    _alloc.destroy(_end);
-                }
-            }
-            else
-                this->insert(this->end(), n - this->size(), val);
-        }
-
-        /*
-        ** @brief Request that the vector capacity be at least
-        ** enougth to contain "n" element.
-        ** If n is greater that the actual capacity a reallocation
-        ** can be happen, otherwise nothing happen.
-        **
-        ** @param n the capacity asked.
-        */
-        void        reserve (size_type n)
-        {
-            if (n > this->max_size())
-                throw (std::length_error("vector::reserve"));
-            else if (n > this->capacity())
-            {
-                pointer prev_start = _start;
-                pointer prev_end = _end;
-                size_type prev_size = this->size();
-                size_type prev_capacity = this->capacity();
-
-                _start = _alloc.allocate( n );
-                _end_capacity = _start + n;
-                _end = _start;
-                while (prev_start != prev_end)
-                {
-                    _alloc.construct(_end, *prev_start);
-                    _end++;
-                    prev_start++;
-                }
-                _alloc.deallocate(prev_start - prev_size, prev_capacity);
-            }
-        }
-
-        // Element access:
-
-        /*
-        ** @brief Returns a reference to the element at
-        ** position n in the vector container.
-        ** If "n" is out of range that's causes undefined behavior.
-        **
-        ** @param n Position of the element in the container.
-        ** @return The specified element at "n" position.
-        */
-        reference operator[] (size_type n) { return (*(_start + n)); }
-
-        /*
-        ** @brief Returns a const reference to the element at
-        ** position n in the vector container.
-        ** If "n" is out of range that's causes undefined behavior.
-        **
-        ** @param n Position of the element in the container.
-        ** @return The specified element at "n" position.
-        */
-        const_reference operator[] (size_type n) const { return (*(_start + n)); }
-
-        /*
-        ** @brief Returns a reference to the element at
-        ** position n in the vector container.
-        ** The main difference between this function and the
-        ** operator "[]" is that the function throw an
-        ** std::out_of_range exception if "n" is out of the range of
-        ** the container.
-        **
-        ** @param n Position of the element in the container.
-        ** @return The specified element at "n" position.
-        */
-        reference at (size_type n)
-        {
-            checkRange(n);
-            return ((*this)[n]);
-        }
-
-        /*
-        ** @brief Returns a const reference to the element at
-        ** position n in the vector container.
-        ** The main difference between this function and the
-        ** operator "[]" is that the function throw an
-        ** std::out_of_range exception if "n" is out of the range of
-        ** the container.
-        **
-        ** @param n Position of the element in the container.
-        ** @return The specified element at "n" position.
-        */
-        const_reference at (size_type n) const
-        {
-            checkRange(n);
-            return ((*this)[n]);
-        }
 
         // Modifiers:
 
