@@ -415,40 +415,31 @@ namespace ft {
 //                _end_capacity = new_end_capacity;
 //            }
 //        }
-//
-//        // todo
-//        iterator erase (iterator position)
-//        {
-//            pointer p_pos = &(*position);
-//            _alloc.destroy(&(*position));
-//            if (&(*position) + 1 == _end)
-//                _alloc.destroy(&(*position));
-//            else
-//            {
-//                for (int i = 0; i < _end - &(*position) - 1; i++)
-//                {
-//                    _alloc.construct(&(*position) + i, *(&(*position) + i + 1));
-//                    _alloc.destroy(&(*position) + i + 1);
-//                }
-//            }
-//            _end -= 1;
-//            return (iterator(p_pos));
-//        }
-//
-//        // todo
-//        iterator erase (iterator first, iterator last)
-//        {
-//            pointer p_first = &(*first);
-//            for (; &(*first) != &(*last); first++)
-//                _alloc.destroy(&(*first));
-//            for (int i = 0; i < _end - &(*last); i++)
-//            {
-//                _alloc.construct(p_first + i, *(&(*last) + i));
-//                _alloc.destroy(&(*last) + i);
-//            }
-//            _end -= (&(*last) - p_first);
-//            return (iterator(p_first));
-//        }
+
+        iterator erase(iterator position) {
+            difference_type d = position - begin();
+            for (pointer to = begin_ + d, from = to + 1; from != end_; ++to, ++from) {
+                alloc_.destroy(to);
+                alloc_.construct(to, *from);
+            }
+            alloc_.destroy(--end_);
+            return begin_ + d;
+        }
+
+        iterator erase(iterator first, iterator last) {
+            difference_type d = first - begin();
+            if (first != last) {
+                pointer to = begin_ + d;
+                for (pointer from = to + (last - first); from != end_; ++to, ++from) {
+                    alloc_.destroy(to);
+                    alloc_.construct(to, *from);
+                }
+                while (end_ != to) {
+                    alloc_.destroy(--end_);
+                }
+            }
+            return begin_ + d;
+        }
 
         void swap(vector& x) {
             using std::swap;
