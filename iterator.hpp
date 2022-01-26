@@ -151,158 +151,158 @@ namespace ft {
         return reverse_iterator<Iter>(x.base() - n);
     }
 
-    template <class Iter>
-    class wrap_iter {
-    public:
-        typedef Iter iterator_type;
-        typedef typename iterator_traits<iterator_type>::value_type value_type;
-        typedef typename iterator_traits<iterator_type>::difference_type difference_type;
-        typedef typename iterator_traits<iterator_type>::pointer pointer;
-        typedef typename iterator_traits<iterator_type>::reference reference;
-        typedef typename iterator_traits<iterator_type>::iterator_category iterator_category;
+    namespace impl {
 
-    private:
-        iterator_type i_;
+        template<class Iter>
+        class wrap_iter {
+        public:
+            typedef Iter iterator_type;
+            typedef typename iterator_traits<iterator_type>::value_type value_type;
+            typedef typename iterator_traits<iterator_type>::difference_type difference_type;
+            typedef typename iterator_traits<iterator_type>::pointer pointer;
+            typedef typename iterator_traits<iterator_type>::reference reference;
+            typedef typename iterator_traits<iterator_type>::iterator_category iterator_category;
 
-    public:
-        wrap_iter() : i_() {}
+        private:
+            iterator_type i_;
 
-        reference operator*() const {
-            return *i_;
+        public:
+            wrap_iter() : i_() {}
+
+            template<class U>
+            wrap_iter(const wrap_iter<U> &u) : i_(u.base()) {}
+
+            wrap_iter(iterator_type x) : i_(x) {}
+
+            reference operator*() const {
+                return *i_;
+            }
+
+            pointer operator->() const {
+                return i_;
+            }
+
+            wrap_iter &operator++() {
+                ++i_;
+                return *this;
+            }
+
+            wrap_iter operator++(int) {
+                wrap_iter tmp(*this);
+                ++i_;
+                return tmp;
+            }
+
+            wrap_iter &operator--() {
+                --i_;
+                return *this;
+            }
+
+            wrap_iter operator--(int) {
+                wrap_iter tmp(*this);
+                --i_;
+                return tmp;
+            }
+
+            wrap_iter operator+(difference_type n) const {
+                return i_ + n;
+            }
+
+            wrap_iter &operator+=(difference_type n) {
+                i_ += n;
+                return *this;
+            }
+
+            wrap_iter operator-(difference_type n) const {
+                return i_ - n;
+            }
+
+            wrap_iter &operator-=(difference_type n) {
+                i_ -= n;
+                return *this;
+            }
+
+            reference operator[](difference_type n) const {
+                return i_[n];
+            }
+
+            iterator_type base() const {
+                return i_;
+            }
+        };
+
+        template<class Iter>
+        bool operator==(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return x.base() == y.base();
         }
 
-        pointer operator->() const {
-            return i_;
+        template<class Iter1, class Iter2>
+        bool operator==(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return x.base() == y.base();
         }
 
-        wrap_iter& operator++() {
-            ++i_;
-            return *this;
+        template<class Iter>
+        bool operator!=(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return !(x == y);
         }
 
-        wrap_iter operator++(int) {
-            wrap_iter tmp(*this);
-            ++i_;
-            return tmp;
+        template<class Iter1, class Iter2>
+        bool operator!=(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return !(x == y);
         }
 
-        wrap_iter& operator--() {
-            --i_;
-            return *this;
+        template<class Iter>
+        bool operator<(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return x.base() < y.base();
         }
 
-        wrap_iter operator--(int) {
-            wrap_iter tmp(*this);
-            --i_;
-            return tmp;
+        template<class Iter1, class Iter2>
+        bool operator<(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return x.base() < y.base();
         }
 
-        wrap_iter operator+(difference_type n) const {
-            return i_ + n;
+        template<class Iter>
+        bool operator>(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return y < x;
         }
 
-        wrap_iter& operator+=(difference_type n) {
-            i_ += n;
-            return *this;
+        template<class Iter1, class Iter2>
+        bool operator>(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return y < x;
         }
 
-        wrap_iter operator-(difference_type n) const {
-            return i_ - n;
+        template<class Iter>
+        bool operator<=(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return !(y < x);
         }
 
-        wrap_iter& operator-=(difference_type n) {
-            i_ -= n;
-            return *this;
+        template<class Iter1, class Iter2>
+        bool operator<=(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return !(y < x);
         }
 
-        reference operator[](difference_type n) const {
-            return i_[n];
+        template<class Iter>
+        bool operator>=(const wrap_iter<Iter> &x, const wrap_iter<Iter> &y) {
+            return !(x < y);
         }
 
-        iterator_type base() const {
-            return i_;
+        template<class Iter1, class Iter2>
+        bool operator>=(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return !(x < y);
         }
 
-    private:
-        wrap_iter(iterator_type x) : i_(x) {}
+        template<class Iter1, class Iter2>
+        typename wrap_iter<Iter1>::difference_type
+        operator-(const wrap_iter<Iter1> &x, const wrap_iter<Iter2> &y) {
+            return x.base() - y.base();
+        }
 
-        template <class U>
-        friend class wrap_iter;
+        template<class Iter>
+        wrap_iter<Iter> operator+(typename wrap_iter<Iter>::difference_type n, wrap_iter<Iter> x) {
+            x += n;
+            return x;
+        }
 
-        template <class T, class Allocator>
-        friend class vector;
-    };
-
-    template <class Iter>
-    bool operator==(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return x.base() == y.base();
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator==(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return x.base() == y.base();
-    }
-
-    template <class Iter>
-    bool operator!=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return !(x == y);
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator!=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return !(x == y);
-    }
-
-    template <class Iter>
-    bool operator<(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return x.base() < y.base();
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator<(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return x.base() < y.base();
-    }
-
-    template <class Iter>
-    bool operator>(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return y < x;
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator>(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return y < x;
-    }
-
-    template <class Iter>
-    bool operator<=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return !(y < x);
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator<=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return !(y < x);
-    }
-
-    template <class Iter>
-    bool operator>=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
-        return !(x < y);
-    }
-
-    template <class Iter1, class Iter2>
-    bool operator>=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return !(x < y);
-    }
-
-    template <class Iter1, class Iter2>
-    typename wrap_iter<Iter1>::difference_type
-    operator-(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
-        return x.base() - y.base();
-    }
-
-    template <class Iter>
-    wrap_iter<Iter> operator+(typename wrap_iter<Iter>::difference_type n, wrap_iter<Iter> x) {
-        x += n;
-        return x;
     }
 
 }
