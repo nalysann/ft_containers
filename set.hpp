@@ -24,7 +24,7 @@ namespace ft {
         typedef typename allocator_type::const_pointer const_pointer;
 
     private:
-        typedef tree<value_type, value_compare, allocator_type> tree_type;
+        typedef impl::tree<value_type, value_compare, allocator_type> tree_type;
         tree_type tree_;
 
     public:

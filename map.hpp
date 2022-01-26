@@ -37,7 +37,7 @@ namespace ft {
         };
 
     private:
-        typedef tree<value_type, value_compare, allocator_type> tree_type;
+        typedef impl::tree<value_type, value_compare, allocator_type> tree_type;
         tree_type tree_;
 
     public:
