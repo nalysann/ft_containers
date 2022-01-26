@@ -44,7 +44,7 @@ namespace ft {
 
     template <class T, class Container>
     inline bool operator==(const stack<T, Container>& x, const stack<T, Container>& y) {
-        return x.c == y.c;
+        return x.c_ == y.c_;
     }
 
     template <class T, class Container>
@@ -54,7 +54,7 @@ namespace ft {
 
     template <class T, class Container>
     inline bool operator<(const stack<T, Container>& x, const stack<T, Container>& y) {
-        return x.c < y.c;
+        return x.c_ < y.c_;
     }
 
     template <class T, class Container>
