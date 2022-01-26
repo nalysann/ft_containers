@@ -14,6 +14,7 @@ add_executable(test
         map.hpp
         set.hpp
         stack.hpp
+        tree.hpp
         type_traits.hpp
         utility.hpp
         vector.hpp)
