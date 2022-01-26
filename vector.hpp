@@ -24,8 +24,8 @@ namespace ft {
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-        typedef wrap_iter<pointer> iterator;
-        typedef wrap_iter<const_pointer> const_iterator;
+        typedef impl::wrap_iter<pointer> iterator;
+        typedef impl::wrap_iter<const_pointer> const_iterator;
         typedef ft::reverse_iterator<iterator> reverse_iterator;
         typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -206,7 +206,7 @@ namespace ft {
                 if (p == end_) {
                     construct_at_end(1, val);
                 } else {
-                    std::copy_backward(p, end_, p + 1);
+                    std::copy_backward(p, end_, end_ + 1);
                     *p = val;
                     ++end_;
                 }
@@ -239,7 +239,6 @@ namespace ft {
             difference_type d = position - begin();
             pointer p = begin_ + d;
             if (n <= static_cast<size_type>(end_cap_ - end_)) {
-                size_type old_n = n;
                 pointer old_end = end_;
                 if (n > static_cast<size_type>(end_ - p)) {
                     size_type c = n - (end_ - p);
@@ -247,7 +246,7 @@ namespace ft {
                     n -= c;
                 }
                 if (n > 0) {
-                    std::copy_backward(p, old_end, p + old_n);
+                    std::copy_backward(p, old_end, old_end + n);
                     std::fill_n(p, n, val);
                 }
             } else {
@@ -257,12 +256,12 @@ namespace ft {
                 pointer new_end_cap = new_begin + new_cap;
                 try {
                     std::uninitialized_copy(begin_, p, new_begin);
-                    for (difference_type i = 0; i < n; ++i) {
+                    for (size_type i = 0; i < n; ++i) {
                         alloc_.construct(new_begin + d + i, val);
                     }
                     std::uninitialized_copy(p, end_, new_begin + d + n);
                 } catch (...) {
-                    for (difference_type i = 0; i < n; ++i) {
+                    for (size_type i = 0; i < n; ++i) {
                         alloc_.destroy(new_begin + d + i);
                     }
                     alloc_.deallocate(new_begin, n);
@@ -278,40 +277,47 @@ namespace ft {
         template <class InputIterator>
         typename enable_if<!is_integral<InputIterator>::value, void>::type
         insert(iterator position, InputIterator first, InputIterator last) {
+            if (first == last) {
+                return;
+            }
             difference_type d = position - begin();
             pointer p = begin_ + d;
-            pointer tmp_n = end_ - p;
-            pointer tmp_begin = alloc_.allocate(tmp_n);
-            pointer tmp_end = tmp_begin + tmp_n;
-            try {
-                std::uninitialized_copy(p, end_, tmp_begin);
-            } catch (...) {
-                alloc_.deallocate(tmp_begin, tmp_n);
-                throw;
+            vector<T> tmp(first, last);
+            size_type n = tmp.size();
+            if (n <= static_cast<size_type>(end_cap_ - end_)) {
+                std::copy_backward(p, end_, end_ + n);
+                std::copy(tmp.begin_, tmp.end_, p);
+                end_ += n;
+            } else {
+                size_type new_cap = std::max(capacity() * 2, size() + n);
+                pointer new_begin = alloc_.allocate(new_cap);
+                pointer new_end = new_begin + size() + n;
+                pointer new_end_cap = new_begin + new_cap;
+                try {
+                    std::uninitialized_copy(begin_, p, new_begin);
+                    std::uninitialized_copy(tmp.begin_, tmp.end_, new_begin + d);
+                    std::uninitialized_copy(p, end_, new_begin + d + n);
+                } catch (...) {
+                    alloc_.deallocate(new_begin, n);
+                    throw;
+                }
+                vdeallocate();
+                begin_ = new_begin;
+                end_ = new_end;
+                end_cap_ = new_end_cap;
             }
-            destruct_at_end(p);
-            for (; first != last; ++first) {
-                push_back(*first);
-            }
-            std::copy(tmp_begin, tmp_end, std::back_inserter(*this));
-            while (tmp_end != tmp_begin) {
-                alloc_.destroy(--tmp_end);
-            }
-            alloc_.deallocate(tmp_begin, tmp_n);
         }
 
         iterator erase(iterator position) {
             pointer p = begin_ + (position - begin());
-            std::copy(p + 1, end_, p);
-            destruct_at_end(end_ - 1);
+            destruct_at_end(std::copy(p + 1, end_, p));
             return p;
         }
 
         iterator erase(iterator first, iterator last) {
             pointer p = begin_ + (first - begin());
             if (first != last) {
-                std::copy(p + (last - first), end_, p);
-                destruct_at_end(p + (last - first));
+                destruct_at_end(std::copy(p + (last - first), end_, p));
             }
             return p;
         }
@@ -352,7 +358,8 @@ namespace ft {
         }
 
         template <class InputIterator>
-        void construct_at_end(InputIterator first, InputIterator last) {
+        typename enable_if<!is_integral<InputIterator>::value, void>::type
+        construct_at_end(InputIterator first, InputIterator last) {
             while (first != last) {
                 alloc_.construct(end_++, *first++);
             }
