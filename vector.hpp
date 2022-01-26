@@ -24,8 +24,8 @@ namespace ft {
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-        typedef impl::wrap_iter<pointer> iterator;
-        typedef impl::wrap_iter<const_pointer> const_iterator;
+        typedef wrap_iter<pointer> iterator;
+        typedef wrap_iter<const_pointer> const_iterator;
         typedef ft::reverse_iterator<iterator> reverse_iterator;
         typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -199,179 +199,121 @@ namespace ft {
             destruct_at_end(end_ - 1);
         }
 
-//        // todo
-//        iterator insert (iterator position, const value_type& val)
-//        {
-//            size_type pos_len = &(*position) - _start;
-//            if (size_type(_end_capacity - _end) >= this->size() + 1)
-//            {
-//                for (size_type i = 0; i < pos_len; i++)
-//                    _alloc.construct(_end - i, *(_end - i - 1));
-//                _end++;
-//                _alloc.construct(&(*position), val);
-//            }
-//            else
-//            {
-//                pointer new_start = pointer();
-//                pointer new_end = pointer();
-//                pointer new_end_capacity = pointer();
-//
-//                int next_capacity = (this->size() * 2 > 0) ? this->size() * 2 : 1;
-//                new_start = _alloc.allocate( next_capacity );
-//                new_end = new_start + this->size() + 1;
-//                new_end_capacity = new_start + next_capacity;
-//
-//                for (size_type i = 0; i < pos_len; i++)
-//                    _alloc.construct(new_start + i, *(_start + i));
-//                _alloc.construct(new_start + pos_len, val);
-//                for (size_type j = 0; j < this->size() - pos_len; j++)
-//                    _alloc.construct(new_end - j - 1, *(_end - j - 1));
-//
-//                for (size_type l = 0; l < this->size(); l++)
-//                    _alloc.destroy(_start + l);
-//                if (_start)
-//                    _alloc.deallocate(_start, this->capacity());
-//
-//                _start = new_start;
-//                _end = new_end;
-//                _end_capacity = new_end_capacity;
-//            }
-//            return (iterator(_start + pos_len));
-//        }
-//
-//        // todo
-//        void insert (iterator position, size_type n, const value_type& val)
-//        {
-//            if (n == 0)
-//                return ;
-//            if (n > this->max_size())
-//                throw (std::length_error("vector::insert (fill)"));
-//            size_type pos_len = &(*position) - _start;
-//            if (size_type(_end_capacity - _end) >= n)
-//            {
-//                for (size_type i = 0; i < this->size() - pos_len; i++)
-//                    _alloc.construct(_end - i + (n - 1), *(_end - i - 1));
-//                _end += n;
-//                while (n)
-//                {
-//                    _alloc.construct(&(*position) + (n - 1), val);
-//                    n--;
-//                }
-//            }
-//            else
-//            {
-//                pointer new_start = pointer();
-//                pointer new_end = pointer();
-//                pointer new_end_capacity = pointer();
-//
-//                int next_capacity = (this->capacity() > 0) ? (int)(this->size() * 2) : 1;
-//                new_start = _alloc.allocate(next_capacity);
-//                new_end_capacity = new_start + next_capacity;
-//
-//                if (size_type(new_end_capacity - new_start) < this->size() + n)
-//                {
-//                    if (new_start)
-//                        _alloc.deallocate(new_start, new_start - new_end_capacity);
-//                    next_capacity = this->size() + n;
-//                    new_start = _alloc.allocate(next_capacity);
-//                    new_end = new_start + this->size() + n;
-//                    new_end_capacity = new_start + next_capacity;
-//                }
-//
-//                new_end = new_start + this->size() + n;
-//
-//                for (int i = 0; i < (&(*position) - _start); i++)
-//                    _alloc.construct(new_start + i, *(_start + i));
-//                for (size_type k = 0; k < n; k++)
-//                    _alloc.construct(new_start + pos_len + k, val);
-//                for (size_type j = 0; j < (this->size() - pos_len); j++)
-//                    _alloc.construct(new_end - j - 1, *(_end - j - 1));
-//
-//                for (size_type u = 0; u < this->size(); u++)
-//                    _alloc.destroy(_start + u);
-//                _alloc.deallocate(_start, this->capacity());
-//
-//                _start = new_start;
-//                _end = new_end;
-//                _end_capacity = new_end_capacity;
-//            }
-//        }
-//
-//        // todo
-//        template <class InputIterator>
-//        void insert (iterator position, InputIterator first, InputIterator last,
-//                     typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* = u_nullptr)
-//        {
-//            bool is_valid;
-//            if (!(is_valid = ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::value))
-//                throw (ft::InvalidIteratorException<typename ft::is_ft_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::type>());
-//
-//            size_type dist = ft::distance(first, last);
-//            if (size_type(_end_capacity - _end) >= dist)
-//            {
-//                for(size_type i = 0; i < this->size() - (&(*position) - _start); i++)
-//                    _alloc.construct(_end - i + (dist - 1), *(_end - i - 1));
-//                _end += dist;
-//                for (; &(*first) != &(*last); first++, position++)
-//                    _alloc.construct(&(*position), *first);
-//            }
-//            else
-//            {
-//                pointer new_start = pointer();
-//                pointer new_end = pointer();
-//                pointer new_end_capacity = pointer();
-//
-//                new_start = _alloc.allocate( this->size() * 2 );
-//                new_end = new_start + this->size() + dist;
-//                new_end_capacity = new_start + ( this->size() * 2 );
-//
-//                if (size_type(new_end_capacity - new_start) < this->size() + dist)
-//                {
-//                    if (new_start)
-//                        _alloc.deallocate(new_start, new_end_capacity - new_start);
-//                    new_start = _alloc.allocate (this->size() + dist);
-//                    new_end = new_start + this->size() + dist;
-//                    new_end_capacity = new_end;
-//                }
-//
-//                for (int i = 0; i < &(*position) - _start; i++)
-//                    _alloc.construct(new_start + i, *(_start + i));
-//                for (int j = 0; &(*first) != &(*last); first++, j++)
-//                    _alloc.construct(new_start + (&(*position) - _start) + j, *first);
-//                for (size_type k = 0; k < this->size() - (&(*position) - _start); k++)
-//                    _alloc.construct(new_start + (&(*position) - _start) + dist + k, *(_start + (&(*position) - _start) + k));
-//
-//                for (size_type l = 0; l < this->size(); l++)
-//                    _alloc.destroy(_start + l);
-//                _alloc.deallocate(_start, this->capacity());
-//
-//                _start = new_start;
-//                _end = new_end;
-//                _end_capacity = new_end_capacity;
-//            }
-//        }
+        iterator insert(iterator position, const value_type& val) {
+            difference_type d = position - begin();
+            pointer p = begin_ + d;
+            if (end_ != end_cap_) {
+                if (p == end_) {
+                    construct_at_end(1, val);
+                } else {
+                    std::copy_backward(p, end_, p + 1);
+                    *p = val;
+                    ++end_;
+                }
+            } else {
+                size_type n = capacity() ? capacity() * 2 : 1;
+                pointer new_begin = alloc_.allocate(n);
+                pointer new_end = new_begin + size() + 1;
+                pointer new_end_cap = new_begin + n;
+                try {
+                    std::uninitialized_copy(begin_, p, new_begin);
+                    alloc_.construct(new_begin + d, val);
+                    std::uninitialized_copy(p, end_, new_begin + d + 1);
+                } catch (...) {
+                    alloc_.destroy(new_begin + d);
+                    alloc_.deallocate(new_begin, n);
+                    throw;
+                }
+                vdeallocate();
+                begin_ = new_begin;
+                end_ = new_end;
+                end_cap_ = new_end_cap;
+            }
+            return p;
+        }
+
+        void insert(iterator position, size_type n, const value_type& val) {
+            if (n == 0) {
+                return;
+            }
+            difference_type d = position - begin();
+            pointer p = begin_ + d;
+            if (n <= static_cast<size_type>(end_cap_ - end_)) {
+                size_type old_n = n;
+                pointer old_end = end_;
+                if (n > static_cast<size_type>(end_ - p)) {
+                    size_type c = n - (end_ - p);
+                    construct_at_end(c, val);
+                    n -= c;
+                }
+                if (n > 0) {
+                    std::copy_backward(p, old_end, p + old_n);
+                    std::fill_n(p, n, val);
+                }
+            } else {
+                size_type new_cap = std::max(capacity() * 2, size() + n);
+                pointer new_begin = alloc_.allocate(new_cap);
+                pointer new_end = new_begin + size() + n;
+                pointer new_end_cap = new_begin + new_cap;
+                try {
+                    std::uninitialized_copy(begin_, p, new_begin);
+                    for (difference_type i = 0; i < n; ++i) {
+                        alloc_.construct(new_begin + d + i, val);
+                    }
+                    std::uninitialized_copy(p, end_, new_begin + d + n);
+                } catch (...) {
+                    for (difference_type i = 0; i < n; ++i) {
+                        alloc_.destroy(new_begin + d + i);
+                    }
+                    alloc_.deallocate(new_begin, n);
+                    throw;
+                }
+                vdeallocate();
+                begin_ = new_begin;
+                end_ = new_end;
+                end_cap_ = new_end_cap;
+            }
+        }
+
+        template <class InputIterator>
+        typename enable_if<!is_integral<InputIterator>::value, void>::type
+        insert(iterator position, InputIterator first, InputIterator last) {
+            difference_type d = position - begin();
+            pointer p = begin_ + d;
+            pointer tmp_n = end_ - p;
+            pointer tmp_begin = alloc_.allocate(tmp_n);
+            pointer tmp_end = tmp_begin + tmp_n;
+            try {
+                std::uninitialized_copy(p, end_, tmp_begin);
+            } catch (...) {
+                alloc_.deallocate(tmp_begin, tmp_n);
+                throw;
+            }
+            destruct_at_end(p);
+            for (; first != last; ++first) {
+                push_back(*first);
+            }
+            std::copy(tmp_begin, tmp_end, std::back_inserter(*this));
+            while (tmp_end != tmp_begin) {
+                alloc_.destroy(--tmp_end);
+            }
+            alloc_.deallocate(tmp_begin, tmp_n);
+        }
 
         iterator erase(iterator position) {
-            difference_type d = position - begin();
-            for (pointer to = begin_ + d, from = to + 1; from != end_; ++to, ++from) {
-                alloc_.destroy(to);
-                alloc_.construct(to, *from);
-            }
+            pointer p = begin_ + (position - begin());
+            std::copy(p + 1, end_, p);
             destruct_at_end(end_ - 1);
-            return begin_ + d;
+            return p;
         }
 
         iterator erase(iterator first, iterator last) {
-            difference_type d = first - begin();
+            pointer p = begin_ + (first - begin());
             if (first != last) {
-                pointer to = begin_ + d;
-                for (pointer from = to + (last - first); from != end_; ++to, ++from) {
-                    alloc_.destroy(to);
-                    alloc_.construct(to, *from);
-                }
-                destruct_at_end(to);
+                std::copy(p + (last - first), end_, p);
+                destruct_at_end(p + (last - first));
             }
-            return begin_ + d;
+            return p;
         }
 
         void swap(vector& x) {
