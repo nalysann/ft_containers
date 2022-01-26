@@ -54,14 +54,12 @@ namespace ft {
 
         template <class InputIterator>
         map(InputIterator first, InputIterator last,
-            const key_compare& compare = key_compare(),
+            const key_compare& comp = key_compare(),
             const allocator_type& alloc = allocator_type())
-            : tree_(first, last, compare, alloc)
+            : tree_(first, last, comp, alloc)
         {}
 
-        map(const map& x)
-            : tree_(x.tree_)
-        {}
+        map(const map& x) : tree_(x.tree_) {}
 
         map& operator=(const map& x) {
             tree_ = x.tree_;
@@ -181,7 +179,7 @@ namespace ft {
         return !(x < y);
     }
 
-    template<class Key, class T, class Compare, class Allocator>
+    template <class Key, class T, class Compare, class Allocator>
     inline void swap(const map<Key, T, Compare, Allocator>& x, const map<Key, T, Compare, Allocator>& y) {
         x.swap(y);
     }
