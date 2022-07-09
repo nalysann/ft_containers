@@ -4,13 +4,11 @@
 
 namespace ft {
 
-    template <class T, class Container = ft::vector<T> >
+    template <class T, class Container = vector<T> >
     class stack {
     public:
         typedef Container container_type;
         typedef typename container_type::value_type value_type;
-        typedef typename container_type::reference reference;
-        typedef typename container_type::const_reference const_reference;
         typedef typename container_type::size_type size_type;
 
     protected:
@@ -19,17 +17,13 @@ namespace ft {
     public:
         explicit stack(const container_type& c = container_type()) : c_(c) {}
 
-        stack(const stack& x) : c_(x.c_) {}
-
-        stack& operator=(const stack& x) { c_ = x.c_; return *this; }
-
         bool empty() const { return c_.empty(); }
 
         size_type size() const { return c_.size(); }
 
-        reference top() { return c_.back(); }
+        value_type& top() { return c_.back(); }
 
-        const_reference top() const { return c_.back(); }
+        const value_type& top() const { return c_.back(); }
 
         void push(const value_type& v) { c_.push_back(v); }
 
