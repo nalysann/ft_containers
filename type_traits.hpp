@@ -6,7 +6,7 @@ namespace ft {
     struct integral_constant {
         static const T value = v;
         typedef T value_type;
-        typedef integral_constant<T, v> type;
+        typedef integral_constant type;
         operator value_type() const { return value; }
     };
 
@@ -14,23 +14,27 @@ namespace ft {
     typedef integral_constant<bool, false> false_type;
 
     template <class T>
-    struct remove_cv {
+    struct remove_const {
         typedef T type;
     };
 
     template <class T>
-    struct remove_cv<const T> {
+    struct remove_const<const T> {
         typedef T type;
     };
 
     template <class T>
-    struct remove_cv<volatile T> {
+    struct remove_volatile {
         typedef T type;
     };
 
     template <class T>
-    struct remove_cv<const volatile T> {
+    struct remove_volatile<volatile T> {
         typedef T type;
+    };
+
+    template <class T> struct remove_cv {
+        typedef typename remove_volatile<typename remove_const<T>::type>::type type;
     };
 
     namespace impl {
