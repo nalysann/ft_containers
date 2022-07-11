@@ -44,6 +44,11 @@ namespace ft {
 
     public:
         typedef Iter iterator_type;
+        typedef typename iterator_traits<Iter>::difference_type difference_type;
+        typedef typename iterator_traits<Iter>::value_type value_type;
+        typedef typename iterator_traits<Iter>::pointer pointer;
+        typedef typename iterator_traits<Iter>::reference reference;
+        typedef typename iterator_traits<Iter>::iterator_category iterator_category;
 
         reverse_iterator() : current() {}
 
@@ -155,17 +160,17 @@ namespace ft {
     namespace impl {
 
         template <class Iter>
-        class wrap_iter
-            : public std::iterator<typename iterator_traits<Iter>::iterator_category,
-                                   typename iterator_traits<Iter>::value_type,
-                                   typename iterator_traits<Iter>::difference_type,
-                                   typename iterator_traits<Iter>::pointer,
-                                   typename iterator_traits<Iter>::reference> {
+        class wrap_iter {
         private:
             Iter i;
 
         public:
             typedef Iter iterator_type;
+            typedef typename iterator_traits<Iter>::difference_type difference_type;
+            typedef typename iterator_traits<Iter>::value_type value_type;
+            typedef typename iterator_traits<Iter>::pointer pointer;
+            typedef typename iterator_traits<Iter>::reference reference;
+            typedef typename iterator_traits<Iter>::iterator_category iterator_category;
 
             wrap_iter() : i() {}
 
