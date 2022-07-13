@@ -33,7 +33,8 @@ namespace ft {
         typedef T type;
     };
 
-    template <class T> struct remove_cv {
+    template <class T>
+    struct remove_cv {
         typedef typename remove_volatile<typename remove_const<T>::type>::type type;
     };
 
@@ -92,7 +93,7 @@ namespace ft {
     template <class T>
     struct is_integral : public impl::is_integral_helper<typename remove_cv<T>::type>::type {};
 
-    template <bool, class T = void>
+    template <bool B, class T = void>
     struct enable_if {};
 
     template <class T>
