@@ -3,12 +3,17 @@
 #include <functional>
 #include <memory>
 
+#include "algorithm.hpp"
+#include "iterator.hpp"
 #include "tree.hpp"
-#include "type_traits.hpp"
 
 namespace ft {
 
-    template <class Key, class Compare = std::less<Key>, class Allocator = std::allocator<Key> >
+    template <
+        class Key,
+        class Compare = std::less<Key>,
+        class Allocator = std::allocator<Key>
+    >
     class set {
     public:
         typedef Key key_type;
@@ -16,8 +21,6 @@ namespace ft {
         typedef Compare key_compare;
         typedef Compare value_compare;
         typedef Allocator allocator_type;
-        typedef typename allocator_type::size_type size_type;
-        typedef typename allocator_type::difference_type difference_type;
         typedef typename allocator_type::reference reference;
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
@@ -28,57 +31,68 @@ namespace ft {
         tree_type tree_;
 
     public:
-        typedef typename tree_type::iterator iterator;
+        typedef typename tree_type::size_type size_type;
+        typedef typename tree_type::difference_type difference_type;
+        typedef typename tree_type::const_iterator iterator;
         typedef typename tree_type::const_iterator const_iterator;
-        typedef typename tree_type::reverse_iterator reverse_iterator;
-        typedef typename tree_type::const_reverse_iterator const_reverse_iterator;
+        typedef ft::reverse_iterator<iterator> reverse_iterator;
+        typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
     public:
-        explicit set(const key_compare &comp = key_compare(),
-                     const allocator_type &alloc = allocator_type())
+        explicit set(const Compare& comp = Compare(),
+                     const Allocator& alloc = Allocator())
             : tree_(comp, alloc)
         {}
 
         template <class InputIterator>
         set(InputIterator first, InputIterator last,
-            const key_compare& comp = key_compare(),
-            const allocator_type& alloc = allocator_type())
-            : tree_(first, last, comp, alloc)
-        {}
+            const Compare& comp = Compare(),
+            const Allocator& alloc = Allocator())
+            : tree_(comp, alloc)
+        {
+            insert(first, last);
+        }
 
-        set(const set& x) : tree_(x.tree_) {}
+        set(const set& s)
+            : tree_(s.tree_)
+        {
+            insert(s.begin(), s.end());
+        }
 
-        set& operator=(const set& x) {
-            tree_ = x.tree_;
+        set& operator=(const set& s) {
+            tree_ = s.tree_;
             return *this;
         }
+
+        allocator_type get_allocator() const { return tree_.get_allocator(); }
 
         iterator begin() { return tree_.begin(); }
         const_iterator begin() const { return tree_.begin(); }
         iterator end() { return tree_.end(); }
         const_iterator end() const { return tree_.end(); }
 
-        reverse_iterator rbegin() { return tree_.rbegin(); }
-        const_reverse_iterator rbegin() const { return tree_.rbegin(); }
-        reverse_iterator rend() { return tree_.rend(); }
-        const_reverse_iterator rend() const { return tree_.rend(); }
+        reverse_iterator rbegin() { return reverse_iterator(end()); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+        reverse_iterator rend() { return reverse_iterator(begin()); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
         bool empty() const { return tree_.empty(); }
         size_type size() const { return tree_.size(); }
         size_type max_size() const { return tree_.max_size(); }
 
-        pair<iterator, bool> insert(const value_type& val) {
-            return tree_.insert(val);
+        pair<iterator, bool> insert(const value_type& v) {
+            return tree_.insert(v);
         }
 
-        iterator insert(iterator hint, const value_type& val) {
-            return tree_.insert(hint, val);
+        iterator insert(iterator hint, const value_type& v) {
+            return tree_.insert(hint, v);
         }
 
         template <class InputIterator>
-        typename enable_if<!is_integral<InputIterator>::value, void>::type
-        insert(InputIterator first, InputIterator last) {
-            tree_.insert(first, last);
+        void insert(InputIterator first, InputIterator last) {
+            for (iterator e = end(); first != last; ++first) {
+                tree_.insert(e, *first);
+            }
         }
 
         void erase(iterator position) {
@@ -93,8 +107,8 @@ namespace ft {
             tree_.erase(first, last);
         }
 
-        void swap(set& x) {
-            tree_.swap(x._tree);
+        void swap(set& s) {
+            tree_.swap(s.tree_);
         }
 
         void clear() {
@@ -104,66 +118,63 @@ namespace ft {
         key_compare key_comp() const { return tree_.value_comp(); }
         value_compare value_comp() const { return tree_.value_comp(); }
 
-        iterator find(const key_type& key) { return tree_.find(key); }
-        const_iterator find(const key_type& key) const { return tree_.find(key); }
-
+        iterator find(const key_type& key) const { return tree_.find(key); }
         size_type count(const key_type& key) const { return tree_.count(key); }
 
-        iterator lower_bound(const key_type& key) { return tree_.lower_bound(key); }
-        const_iterator lower_bound(const key_type& key) const { return tree_.lower_bound(key); }
+        iterator lower_bound(const key_type& key) const { return tree_.lower_bound(key); }
+        iterator upper_bound(const key_type& key) const { return tree_.upper_bound(key); }
 
-        iterator upper_bound(const key_type& key) { return tree_.upper_bound(key); }
-        const_iterator upper_bound(const key_type& key) const { return tree_.upper_bound(key); }
-
-        pair<iterator, iterator> equal_range(const key_type& key) {
+        pair<iterator, iterator> equal_range(const key_type& key) const {
             return tree_.equal_range(key);
         }
-
-        pair<const_iterator, const_iterator> equal_range(const key_type& key) const {
-            return tree_.equal_range(key);
-        }
-
-        allocator_type get_allocator() const { return tree_.get_allocator(); }
-
-        template <class K1, class C1, class A1>
-        friend bool operator==(const set<K1, C1, A1>& x, const set<K1, C1, A1>& y);
-
-        template <class K1, class C1, class A1>
-        friend bool operator<(const set<K1, C1, A1>& x, const set<K1, C1, A1>& y);
     };
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator==(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
-        return x.tree_ == y.tree_;
+    inline bool operator==(const set<Key, Compare, Allocator>& x,
+                           const set<Key, Compare, Allocator>& y)
+    {
+        return x.size() == y.size() && equal(x.begin(), x.end(), y.begin());
     }
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator!=(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
+    inline bool operator!=(const set<Key, Compare, Allocator>& x,
+                           const set<Key, Compare, Allocator>& y)
+    {
         return !(x == y);
     }
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator<(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
-        return x.tree_ < y.tree_;
+    inline bool operator<(const set<Key, Compare, Allocator>& x,
+                          const set<Key, Compare, Allocator>& y)
+    {
+        return lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
     }
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator>(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
+    inline bool operator>(const set<Key, Compare, Allocator>& x,
+                          const set<Key, Compare, Allocator>& y)
+    {
         return y < x;
     }
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator<=(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
+    inline bool operator<=(const set<Key, Compare, Allocator>& x,
+                           const set<Key, Compare, Allocator>& y)
+    {
         return !(y < x);
     }
 
     template <class Key, class Compare, class Allocator>
-    inline bool operator>=(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
+    inline bool operator>=(const set<Key, Compare, Allocator>& x,
+                           const set<Key, Compare, Allocator>& y)
+    {
         return !(x < y);
     }
 
     template <class Key, class Compare, class Allocator>
-    inline void swap(const set<Key, Compare, Allocator>& x, const set<Key, Compare, Allocator>& y) {
+    inline void swap(const set<Key, Compare, Allocator>& x,
+                     const set<Key, Compare, Allocator>& y)
+    {
         x.swap(y);
     }
 
