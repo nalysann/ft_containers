@@ -88,73 +88,73 @@ public:
 };
 
 template <class Iter>
-inline bool operator==(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator==(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return x.base() == y.base();
 }
 
 template <class Iter1, class Iter2>
-inline bool operator==(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator==(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return x.base() == y.base();
 }
 
 template <class Iter>
-inline bool operator!=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator!=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return !(x == y);
 }
 
 template <class Iter1, class Iter2>
-inline bool operator!=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator!=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return !(x == y);
 }
 
 template <class Iter>
-inline bool operator<(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator<(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return x.base() < y.base();
 }
 
 template <class Iter1, class Iter2>
-inline bool operator<(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator<(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return x.base() < y.base();
 }
 
 template <class Iter>
-inline bool operator>(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator>(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return y < x;
 }
 
 template <class Iter1, class Iter2>
-inline bool operator>(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator>(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return y < x;
 }
 
 template <class Iter>
-inline bool operator<=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator<=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return !(y < x);
 }
 
 template <class Iter1, class Iter2>
-inline bool operator<=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator<=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return !(y < x);
 }
 
 template <class Iter>
-inline bool operator>=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
+bool operator>=(const wrap_iter<Iter>& x, const wrap_iter<Iter>& y) {
     return !(x < y);
 }
 
 template <class Iter1, class Iter2>
-inline bool operator>=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
+bool operator>=(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return !(x < y);
 }
 
 template <class Iter1, class Iter2>
-inline typename wrap_iter<Iter1>::difference_type
+typename wrap_iter<Iter1>::difference_type
 operator-(const wrap_iter<Iter1>& x, const wrap_iter<Iter2>& y) {
     return x.base() - y.base();
 }
 
 template <class Iter>
-inline wrap_iter<Iter>
+wrap_iter<Iter>
 operator+(typename wrap_iter<Iter>::difference_type n, const wrap_iter<Iter>& x) {
     return wrap_iter<Iter>(x.base() + n);
 }

@@ -79,37 +79,37 @@ private:
 };
 
 template <class T, class D>
-inline void swap(unique_ptr<T, D>& x, unique_ptr<T, D>& y){
+void swap(unique_ptr<T, D>& x, unique_ptr<T, D>& y){
     x.swap(y);
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator==(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator==(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return x.get() == y.get();
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator!=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator!=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return !(x.get() == y.get());
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator<(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator<(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return x.get() < y.get();
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator<=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator<=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return !(y.get() < x.get());
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator>(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator>(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return y.get() < x.get();
 }
 
 template <class T, class TD, class U, class UD>
-inline bool operator>=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
+bool operator>=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return !(x.get() < y.get());
 }
 

@@ -37,32 +37,32 @@ public:
 };
 
 template <class T, class Container>
-inline bool operator==(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator==(const stack<T, Container>& x, const stack<T, Container>& y) {
     return x.c == y.c;
 }
 
 template <class T, class Container>
-inline bool operator!=(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator!=(const stack<T, Container>& x, const stack<T, Container>& y) {
     return !(x == y);
 }
 
 template <class T, class Container>
-inline bool operator<(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator<(const stack<T, Container>& x, const stack<T, Container>& y) {
     return x.c < y.c;
 }
 
 template <class T, class Container>
-inline bool operator>(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator>(const stack<T, Container>& x, const stack<T, Container>& y) {
     return y < x;
 }
 
 template <class T, class Container>
-inline bool operator<=(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator<=(const stack<T, Container>& x, const stack<T, Container>& y) {
     return !(y < x);
 }
 
 template <class T, class Container>
-inline bool operator>=(const stack<T, Container>& x, const stack<T, Container>& y) {
+bool operator>=(const stack<T, Container>& x, const stack<T, Container>& y) {
     return !(x < y);
 }
 
