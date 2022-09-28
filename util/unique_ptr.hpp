@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace ft::impl {
+namespace ft {
 
 template <class T>
 struct default_delete {
@@ -27,7 +27,7 @@ private:
 public:
     unique_ptr() : ptr(), d() {}
     explicit unique_ptr(pointer p) : ptr(p), d() {}
-    unique_ptr(pointer p, deleter_type d) : ptr(p), d() {}
+    unique_ptr(pointer p, deleter_type d) : ptr(p), d(d) {}
     ~unique_ptr() { reset(); }
 
     element_type& operator*() const {
@@ -48,10 +48,6 @@ public:
 
     const deleter_type& get_deleter() const {
         return d;
-    }
-
-    explicit operator bool() const {
-        return get() != 0;
     }
 
     pointer release() {
@@ -113,4 +109,4 @@ bool operator>=(const unique_ptr<T, TD>& x, const unique_ptr<U, UD>& y) {
     return !(x.get() < y.get());
 }
 
-} // namespace ft::impl
+} // namespace ft
