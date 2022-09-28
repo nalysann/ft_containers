@@ -1,9 +1,12 @@
 #pragma once
 
-#include "util/integral_constant.hpp"
-#include "util/remove_cv.hpp"
+#include "integral_constant.hpp"
+#include "remove_cv.hpp"
 
-namespace ft::impl {
+namespace {
+
+using ft::false_type;
+using ft::true_type;
 
 template <class>
 struct is_integral_helper : public false_type {};
@@ -53,11 +56,11 @@ struct is_integral_helper<__int128_t> : public true_type {};
 template <>
 struct is_integral_helper<__uint128_t> : public true_type {};
 
-} // namespace ft::impl
+} // anonymous namespace
 
 namespace ft {
 
 template <class T>
-struct is_integral : public impl::is_integral_helper<typename remove_cv<T>::type>::type {};
+struct is_integral : public is_integral_helper<typename remove_cv<T>::type>::type {};
 
 } // namespace ft

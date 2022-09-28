@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/remove_const.hpp"
-#include "util/remove_volatile.hpp"
+#include "remove_const.hpp"
+#include "remove_volatile.hpp"
 
 namespace ft {
 
