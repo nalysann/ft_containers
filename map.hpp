@@ -296,7 +296,7 @@ public:
         return *this;
     }
 
-    allocator_type get_allocator() const { return allocator_type(tree_.alloc()); }
+    allocator_type get_allocator() const { return allocator_type(tree_.get_allocator()); }
 
     iterator begin() { return tree_.begin(); }
     const_iterator begin() const { return tree_.begin(); }
@@ -449,4 +449,4 @@ void swap(const map<Key, T, Compare, Allocator>& x,
     x.swap(y);
 }
 
-}
+} // namespace ft
