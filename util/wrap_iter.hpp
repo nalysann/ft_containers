@@ -2,7 +2,8 @@
 
 #include "util/iterator_traits.hpp"
 
-namespace ft::impl {
+namespace ft {
+namespace impl {
 
 template <class Iter>
 class wrap_iter {
@@ -159,4 +160,5 @@ operator+(typename wrap_iter<Iter>::difference_type n, const wrap_iter<Iter>& x)
     return wrap_iter<Iter>(x.base() + n);
 }
 
-} // namespace ft::impl
+} // namespace impl
+} // namespace ft
